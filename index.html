@@ -87,9 +87,7 @@
             };
 
             const triggerAction = (e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                
+                e.preventDefault(); e.stopPropagation();
                 const btn = e.currentTarget;
                 const val = btn.getAttribute('data-v');
 
@@ -112,7 +110,16 @@
                         formulaEl.innerText = state.expr + "=";
                         state.ansValue = result;
                         state.lastValue = result;
-                        state.viewMode = state.expr.indexOf("°") !== -1 ? "DMS" : "standard";
+                        
+                        // FIX: If it's a trig calculation (sin, cos, tan), ALWAYS show decimal result
+                        // Otherwise, follow the rule: if input has DMS, output DMS
+                        const isTrig = state.expr.match(/sin|cos|tan|asin|acos|atan/);
+                        if (isTrig) {
+                            state.viewMode = "standard";
+                        } else {
+                            state.viewMode = state.expr.indexOf("°") !== -1 ? "DMS" : "standard";
+                        }
+                        
                         state.expr = Number.isInteger(result) ? result.toString() : result.toFixed(10).replace(/\.?0+$/, "");
                     } catch (err) { resultEl.innerText = "Error"; }
                 } else if (finalAct === "DMS") {
@@ -144,10 +151,7 @@
 
             if (document.readyState === 'loading') {
                 document.addEventListener('DOMContentLoaded', boot);
-            } else {
-                boot();
-            }
-            // Continuous Health Check for GH-Pages environment
+            } else { boot(); }
             setInterval(boot, 2000);
         })();
     </script>
