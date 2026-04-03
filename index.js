@@ -3,6 +3,7 @@ import { evaluate, format } from 'mathjs';
 const formulaEl = document.getElementById('formula');
 const resultEl = document.getElementById('result');
 
+// Persistent state for absolute calculation reliability
 let state = {
     expr: "", 
     lastValue: 0,
@@ -11,6 +12,7 @@ let state = {
     viewMode: "standard" 
 };
 
+// HELPER: Trig Parser for Degrees/DMS
 const solve = (str) => {
     let clean = str.replace(/Ans/g, `(${state.ansValue})`);
     clean = clean.replace(/(\d+)°(\d+)'(\d+(?:\.\d+)?)"/g, '($1 + $2/60 + $3/3600)');
@@ -31,18 +33,15 @@ const solve = (str) => {
     return clean;
 };
 
-// EXPLICIT ACTION FUNCTION
-const doClick = (btnVal, btnWrapper) => {
-    const val = btnVal;
-    
-    if (val === "SHIFT") { state.isShift = !state.isShift; update(); return; }
-    if (val === "AC") { state.expr = ""; formulaEl.innerText = ""; state.viewMode = "standard"; update(); return; }
-    if (val === "DEL") { state.expr = state.expr.slice(0, -1); update(); return; }
+// CORE ACTION LOGIC - Fully decoupled from individual events
+const doWork = (val, wrapper) => {
+    if (val === "SHIFT") { state.isShift = !state.isShift; updateUI(); return; }
+    if (val === "AC") { state.expr = ""; formulaEl.innerText = ""; state.viewMode = "standard"; updateUI(); return; }
+    if (val === "DEL") { state.expr = state.expr.slice(0, -1); updateUI(); return; }
 
     let action = val;
     if (state.isShift) {
-        // Re-read gold label since we might be in shift state
-        const gold = btnWrapper?.querySelector('.label-gold')?.innerText.trim() || "";
+        const gold = wrapper?.querySelector('.label-gold')?.innerText.trim() || "";
         if (gold.includes('asin')) action = 'asin';
         else if (gold.includes('acos')) action = 'acos';
         else if (gold.includes('atan')) action = 'atan';
@@ -66,9 +65,9 @@ const doClick = (btnVal, btnWrapper) => {
         const lastToken = state.expr.split(/[+\-*/() ]/).pop();
         const lastChar = state.expr.slice(-1);
         if (/\d/.test(lastChar)) {
-            const dmsSymbols = ["°", "'", '"'];
+            const symbols = ["°", "'", '"'];
             const count = (lastToken.match(/[°'"]/g) || []).length;
-            if (count < 3) state.expr += dmsSymbols[count];
+            if (count < 3) state.expr += symbols[count];
         } else if (state.lastValue !== 0) {
             state.viewMode = (state.viewMode === "DMS") ? "standard" : "DMS";
         }
@@ -77,41 +76,39 @@ const doClick = (btnVal, btnWrapper) => {
     } else {
         state.expr += action;
     }
-    update();
+    updateUI();
 };
 
-// FINAL OVERHAUL FOR TOUCH RELIABILITY
-// Using the most basic and compatible event attachment strategy
-window.onload = () => {
-    const buttons = document.getElementsByTagName('button');
-    for (let i = 0; i < buttons.length; i++) {
-        const b = buttons[i];
-        
-        // Use pointerdown or touchstart directly on the element
-        const trigger = (e) => {
+// UNIVERSAL REACTION - Binding directly to every button
+// Using mousedown (Immediate) + touchstart (Mobile Immediate)
+const bindButtons = () => {
+    const btns = document.querySelectorAll('button');
+    btns.forEach(b => {
+        const h = (e) => {
             e.preventDefault();
             e.stopPropagation();
-            doClick(b.getAttribute('data-v'), b.closest('.btn-wrapper'));
+            doWork(b.getAttribute('data-v'), b.closest('.btn-wrapper'));
         };
-
-        b.addEventListener('pointerdown', trigger, { passive: false });
-        b.addEventListener('click', trigger);
-    }
+        // Use separate handlers to bypass various browser blocks
+        b.onmousedown = h;
+        b.ontouchstart = h;
+    });
 };
 
-function toDMS(d) {
-    const abs = Math.abs(d);
-    const deg = Math.floor(abs);
-    const remMin = (abs - deg) * 60;
-    const min = Math.floor(remMin);
-    const sec = ((remMin - min) * 60).toFixed(2);
-    return `${d < 0 ? '-' : ''}${deg}°${min}'${sec}"`;
-}
+// Initial binding
+bindButtons();
+// Re-bind occasionally for dynamic edge cases
+setInterval(bindButtons, 2000);
 
-function update() {
+function updateUI() {
     let modeH = state.isShift ? "S " : "";
     if (state.viewMode === "DMS" && state.lastValue !== 0) {
-        resultEl.innerText = modeH + toDMS(state.lastValue);
+        const abs = Math.abs(state.lastValue);
+        const deg = Math.floor(abs);
+        const remMin = (abs - deg) * 60;
+        const min = Math.floor(remMin);
+        const sec = ((remMin - min) * 60).toFixed(2);
+        resultEl.innerText = modeH + `${state.lastValue < 0 ? '-' : ''}${deg}°${min}'${sec}"`;
     } else {
         resultEl.innerText = modeH + (state.expr === "" ? "0" : state.expr);
     }
