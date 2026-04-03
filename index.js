@@ -3,7 +3,6 @@ import { evaluate, format } from 'mathjs';
 const formulaEl = document.getElementById('formula');
 const resultEl = document.getElementById('result');
 
-// Persistent state for absolute calculation reliability
 let state = {
     expr: "", 
     lastValue: 0,
@@ -12,7 +11,6 @@ let state = {
     viewMode: "standard" 
 };
 
-// HELPER: Trig Parser for Degrees/DMS
 const solve = (str) => {
     let clean = str.replace(/Ans/g, `(${state.ansValue})`);
     clean = clean.replace(/(\d+)°(\d+)'(\d+(?:\.\d+)?)"/g, '($1 + $2/60 + $3/3600)');
@@ -33,7 +31,6 @@ const solve = (str) => {
     return clean;
 };
 
-// CORE ACTION LOGIC - Fully decoupled from individual events
 const doWork = (val, wrapper) => {
     if (val === "SHIFT") { state.isShift = !state.isShift; updateUI(); return; }
     if (val === "AC") { state.expr = ""; formulaEl.innerText = ""; state.viewMode = "standard"; updateUI(); return; }
@@ -41,10 +38,13 @@ const doWork = (val, wrapper) => {
 
     let action = val;
     if (state.isShift) {
-        const gold = wrapper?.querySelector('.label-gold')?.innerText.trim() || "";
-        if (gold.includes('asin')) action = 'asin';
-        else if (gold.includes('acos')) action = 'acos';
-        else if (gold.includes('atan')) action = 'atan';
+        const goldElements = wrapper?.getElementsByClassName('label-gold');
+        if (goldElements && goldElements.length > 0) {
+            const goldText = goldElements[0].innerText.trim();
+            if (goldText.includes('asin')) action = 'asin';
+            else if (goldText.includes('acos')) action = 'acos';
+            else if (goldText.includes('atan')) action = 'atan';
+        }
         state.isShift = false;
     }
 
@@ -79,26 +79,43 @@ const doWork = (val, wrapper) => {
     updateUI();
 };
 
-// UNIVERSAL REACTION - Binding directly to every button
-// Using mousedown (Immediate) + touchstart (Mobile Immediate)
+// MULTI-LAYERED UNIVERSAL BINDING
+// Handles PointerEvents (modern), TouchEvents (mobile), and Click (legacy)
 const bindButtons = () => {
-    const btns = document.querySelectorAll('button');
-    btns.forEach(b => {
-        const h = (e) => {
+    const btns = document.getElementsByTagName('button');
+    for (let i = 0; i < btns.length; i++) {
+        const btn = btns[i];
+        const val = btn.getAttribute('data-val') || btn.dataset.v; // Dual selector support
+        const wrapper = btn.closest('.btn-wrapper');
+
+        const handler = (e) => {
+            // Only allow one trigger per action to prevent double inputs
+            if (e.defaultPrevented) return;
             e.preventDefault();
             e.stopPropagation();
-            doWork(b.getAttribute('data-v'), b.closest('.btn-wrapper'));
+            
+            doWork(val, wrapper);
         };
-        // Use separate handlers to bypass various browser blocks
-        b.onmousedown = h;
-        b.ontouchstart = h;
-    });
+
+        // Aggressive property-level binding (Bypasses most CSP and event-blocking layers)
+        btn.onclick = handler;
+        btn.ontouchstart = handler;
+        btn.onmousedown = handler;
+        
+        // Modern standard fallback
+        btn.addEventListener('pointerdown', handler, { passive: false });
+    }
 };
 
-// Initial binding
-bindButtons();
-// Re-bind occasionally for dynamic edge cases
-setInterval(bindButtons, 2000);
+// Initial binding after DOM content load (Crucial for static pages like GH-Pages)
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', bindButtons);
+} else {
+    bindButtons();
+}
+
+// Keep the heart-beat for dynamic HMR or partial re-renders
+setInterval(bindButtons, 3000);
 
 function updateUI() {
     let modeH = state.isShift ? "S " : "";
