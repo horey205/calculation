@@ -5,16 +5,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Casio fx-570VN PLUS | Standard Baseline</title>
     <style>
-        :root { --bg: #2c3e50; --screen: #94ad94; --btn: #3d5a80; --white: #ecf0f1; --orange: #f39c12; }
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        body { background: #222; display: flex; justify-content: center; align-items: center; height: 100vh; overflow: hidden; }
-        .calc { width: 100%; max-width: 400px; background: #34495e; padding: 15px; border-radius: 12px; box-shadow: 0 10px 50px rgba(0,0,0,0.8); }
-        .screen { background: var(--screen); height: 120px; border-radius: 4px; padding: 15px; display: flex; flex-direction: column; justify-content: space-between; align-items: flex-end; box-shadow: inset 0 2px 10px rgba(0,0,0,0.3); margin-bottom: 20px; }
-        #formula { font-size: 1.1rem; color: #1a2a1a; word-break: break-all; text-align: right; }
-        #result { font-size: 2rem; font-weight: bold; color: #1a2a1a; text-align: right; overflow: hidden; }
+        :root { --bg: #222; --screen: #94ad94; --btn: #3d5a80; --white: #ecf0f1; --orange: #f39c12; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; touch-action: manipulation; }
+        body { background: #111; display: flex; justify-content: center; align-items: center; height: 100vh; overflow: hidden; margin: 0; }
+        .calc { width: 100%; max-width: 400px; background: #34495e; padding: 15px; border-radius: 15px; box-shadow: 0 10px 40px rgba(0,0,0,0.8); }
+        .screen { background: var(--screen); height: 120px; border-radius: 6px; padding: 12px; display: flex; flex-direction: column; justify-content: space-between; align-items: flex-end; box-shadow: inset 0 2px 10px rgba(0,0,0,0.4); margin-bottom: 20px; border: 2px solid #555; }
+        #formula { font-size: 1.1rem; color: #1a2a1a; word-break: break-all; text-align: right; height: 1.5rem; overflow: hidden; opacity: 0.8; }
+        #result { font-size: 2.2rem; font-weight: bold; color: #1a2a1a; text-align: right; }
         .grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; }
-        button { height: 52px; border: none; border-radius: 6px; background: var(--btn); color: white; cursor: pointer; font-size: 0.9rem; font-weight: bold; box-shadow: 0 4px 0 #1B263B; }
-        button:active { transform: translateY(2px); box-shadow: 0 2px 0 #1B263B; }
+        button { height: 50px; border: none; border-radius: 6px; background: var(--btn); color: white; cursor: pointer; font-size: 0.9rem; font-weight: bold; box-shadow: 0 4px 0 #1b263b; -webkit-tap-highlight-color: transparent; }
+        button:active { transform: translateY(2px); box-shadow: 0 1px 0 #1b263b; background: #4a6fa5; }
         .btn-n { background: var(--white); color: #333; font-size: 1.4rem; box-shadow: 0 4px 0 #bdc3c7; }
         .btn-op { background: var(--orange); box-shadow: 0 4px 0 #d35400; }
         .btn-shift { background: #e67e22; box-shadow: 0 4px 0 #d35400; }
@@ -39,31 +39,104 @@
             <button data-v="sqrt">√</button>
             <button data-v="DEL" class="btn-op">DEL</button>
             
-            <button data-v="7" class="btn-n">7</button>
-            <button data-v="8" class="btn-n">8</button>
-            <button data-v="9" class="btn-n">9</button>
-            <button data-v="(">(</button>
-            <button data-v=")">)</button>
-            
-            <button data-v="4" class="btn-n">4</button>
-            <button data-v="5" class="btn-n">5</button>
-            <button data-v="6" class="btn-n">6</button>
-            <button data-v="*">×</button>
-            <button data-v="/">÷</button>
-            
-            <button data-v="1" class="btn-n">1</button>
-            <button data-v="2" class="btn-n">2</button>
-            <button data-v="3" class="btn-n">3</button>
-            <button data-v="+">+</button>
-            <button data-v="-">-</button>
-            
-            <button data-v="0" class="btn-n">0</button>
-            <button data-v=".">.</button>
-            <button data-v="DMS">.,,,</button>
-            <button data-v="Ans">Ans</button>
-            <button data-v="=" class="btn-op">=</button>
+            <button data-v="7" class="btn-n">7</button><button data-v="8" class="btn-n">8</button><button data-v="9" class="btn-n">9</button><button data-v="(">(</button><button data-v=")">)</button>
+            <button data-v="4" class="btn-n">4</button><button data-v="5" class="btn-n">5</button><button data-v="6" class="btn-n">6</button><button data-v="*">×</button><button data-v="/">÷</button>
+            <button data-v="1" class="btn-n">1</button><button data-v="2" class="btn-n">2</button><button data-v="3" class="btn-n">3</button><button data-v="+">+</button><button data-v="-">-</button>
+            <button data-v="0" class="btn-n">0</button><button data-v=".">.</button><button data-v="DMS">.,,,</button><button data-v="Ans">Ans</button><button data-v="=" class="btn-op">=</button>
         </div>
     </div>
-    <script type="module" src="index.js"></script>
+    <script>
+        // SINGLE-FILE STANDALONE ENGINE (MAX COMPATIBILITY)
+        const formulaEl = document.getElementById('formula');
+        const resultEl = document.getElementById('result');
+        let state = { expr: "", lastValue: 0, ansValue: 0, isShift: false, viewMode: "standard" };
+
+        const degToRad = (d) => d * (Math.PI / 180);
+        const radToDeg = (r) => r * (180 / Math.PI);
+
+        const solveFinal = (str) => {
+            let f = str.replace(/Ans/g, "(" + state.ansValue + ")");
+            f = f.replace(/(\d+)°(\d+)'(\d+(?:\.\d+)?)"/g, '($1 + $2/60 + $3/3600)');
+            f = f.replace(/(\d+)°(\d+)'/g, '($1 + $2/60)');
+            f = f.replace(/(\d+)°/g, '($1)');
+            f = f.replace(/×/g, '*').replace(/÷/g, '/');
+            f = f.replace(/asin\(([^)]+)\)/g, 'radToDeg(Math.asin($1))');
+            f = f.replace(/acos\(([^)]+)\)/g, 'radToDeg(Math.acos($1))');
+            f = f.replace(/atan\(([^)]+)\)/g, 'radToDeg(Math.atan($1))');
+            f = f.replace(/(?<!a)sin\(([^)]+)\)/g, 'Math.sin(degToRad($1))');
+            f = f.replace(/(?<!a)cos\(([^)]+)\)/g, 'Math.cos(degToRad($1))');
+            f = f.replace(/(?<!a)tan\(([^)]+)\)/g, 'Math.tan(degToRad($1))');
+            f = f.replace(/sqrt\(([^)]+)\)/g, 'Math.sqrt($1)');
+            let open = (f.match(/\(/g) || []).length;
+            let close = (f.match(/\)/g) || []).length;
+            while (open > close) { f += ")"; open--; }
+            return eval(f);
+        };
+
+        const updateUI = () => {
+            let mode = state.isShift ? "S " : "";
+            if (state.viewMode === "DMS" && state.lastValue !== 0) {
+                const abs = Math.abs(state.lastValue);
+                const d = Math.floor(abs);
+                const m = Math.floor((abs - d) * 60);
+                const s = ((abs - d) * 60 - m) * 60;
+                resultEl.innerText = mode + (state.lastValue < 0 ? "-" : "") + d + "°" + m + "'" + s.toFixed(2) + "\"";
+            } else {
+                resultEl.innerText = mode + (state.expr === "" ? "0" : state.expr);
+            }
+        };
+
+        const handleInput = (val, btn) => {
+            if (val === "SHIFT") { state.isShift = !state.isShift; updateUI(); return; }
+            if (val === "AC") { state.expr = ""; formulaEl.innerText = ""; state.viewMode = "standard"; updateUI(); return; }
+            if (val === "DEL") { state.expr = state.expr.slice(0, -1); updateUI(); return; }
+
+            let action = val;
+            if (state.isShift) {
+                if (action === "sin") action = "asin";
+                else if (action === "cos") action = "acos";
+                else if (action === "tan") action = "atan";
+                state.isShift = false;
+            }
+
+            if (action === "=") {
+                if (!state.expr) return;
+                try {
+                    const res = solveFinal(state.expr);
+                    formulaEl.innerText = state.expr + "=";
+                    state.ansValue = res;
+                    state.lastValue = res;
+                    state.viewMode = state.expr.indexOf("°") !== -1 ? "DMS" : "standard";
+                    state.expr = Number.isInteger(res) ? res.toString() : res.toFixed(10).replace(/\.?0+$/, "");
+                } catch (e) { resultEl.innerText = "Error"; }
+            } else if (action === "DMS") {
+                const dmsSyms = ["°", "'", '"'];
+                const lastToken = state.expr.split(/[+\-*/() ]/).pop();
+                if (/\d/.test(state.expr.slice(-1))) {
+                    const symCnt = (lastToken.match(/[°'"]/g) || []).length;
+                    if (symCnt < 3) state.expr += dmsSyms[symCnt];
+                } else if (state.lastValue !== 0) {
+                    state.viewMode = state.viewMode === "DMS" ? "standard" : "DMS";
+                }
+            } else if (["sin", "cos", "tan", "asin", "acos", "atan", "sqrt"].indexOf(action) !== -1) {
+                state.expr += action + "(";
+            } else {
+                state.expr += action;
+            }
+            updateUI();
+        };
+
+        // BINDING
+        const btns = document.querySelectorAll('button');
+        btns.forEach(b => {
+             const v = b.getAttribute('data-v');
+             const trigger = (e) => {
+                 e.preventDefault(); e.stopPropagation();
+                 handleInput(v, b);
+                 return false;
+             };
+             b.onclick = trigger; b.ontouchstart = trigger;
+        });
+    </script>
 </body>
 </html>
