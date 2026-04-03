@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Casio fx-570VN PLUS | Standard Baseline</title>
+    <style>
+        :root { --bg: #2c3e50; --screen: #94ad94; --btn: #3d5a80; --white: #ecf0f1; --orange: #f39c12; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background: #222; display: flex; justify-content: center; align-items: center; height: 100vh; overflow: hidden; }
+        .calc { width: 100%; max-width: 400px; background: #34495e; padding: 15px; border-radius: 12px; box-shadow: 0 10px 50px rgba(0,0,0,0.8); }
+        .screen { background: var(--screen); height: 120px; border-radius: 4px; padding: 15px; display: flex; flex-direction: column; justify-content: space-between; align-items: flex-end; box-shadow: inset 0 2px 10px rgba(0,0,0,0.3); margin-bottom: 20px; }
+        #formula { font-size: 1.1rem; color: #1a2a1a; word-break: break-all; text-align: right; }
+        #result { font-size: 2rem; font-weight: bold; color: #1a2a1a; text-align: right; overflow: hidden; }
+        .grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; }
+        button { height: 52px; border: none; border-radius: 6px; background: var(--btn); color: white; cursor: pointer; font-size: 0.9rem; font-weight: bold; box-shadow: 0 4px 0 #1B263B; }
+        button:active { transform: translateY(2px); box-shadow: 0 2px 0 #1B263B; }
+        .btn-n { background: var(--white); color: #333; font-size: 1.4rem; box-shadow: 0 4px 0 #bdc3c7; }
+        .btn-op { background: var(--orange); box-shadow: 0 4px 0 #d35400; }
+        .btn-shift { background: #e67e22; box-shadow: 0 4px 0 #d35400; }
+    </style>
+</head>
+<body>
+    <div class="calc">
+        <div class="screen">
+            <div id="formula"></div>
+            <div id="result">0</div>
+        </div>
+        <div class="grid">
+            <button data-v="SHIFT" class="btn-shift">SHIFT</button>
+            <button data-v="sin">sin</button>
+            <button data-v="cos">cos</button>
+            <button data-v="tan">tan</button>
+            <button data-v="AC" class="btn-op">AC</button>
+            
+            <button data-v="asin">sin-1</button>
+            <button data-v="acos">cos-1</button>
+            <button data-v="atan">tan-1</button>
+            <button data-v="sqrt">√</button>
+            <button data-v="DEL" class="btn-op">DEL</button>
+            
+            <button data-v="7" class="btn-n">7</button>
+            <button data-v="8" class="btn-n">8</button>
+            <button data-v="9" class="btn-n">9</button>
+            <button data-v="(">(</button>
+            <button data-v=")">)</button>
+            
+            <button data-v="4" class="btn-n">4</button>
+            <button data-v="5" class="btn-n">5</button>
+            <button data-v="6" class="btn-n">6</button>
+            <button data-v="*">×</button>
+            <button data-v="/">÷</button>
+            
+            <button data-v="1" class="btn-n">1</button>
+            <button data-v="2" class="btn-n">2</button>
+            <button data-v="3" class="btn-n">3</button>
+            <button data-v="+">+</button>
+            <button data-v="-">-</button>
+            
+            <button data-v="0" class="btn-n">0</button>
+            <button data-v=".">.</button>
+            <button data-v="DMS">.,,,</button>
+            <button data-v="Ans">Ans</button>
+            <button data-v="=" class="btn-op">=</button>
+        </div>
+    </div>
+    <script type="module" src="index.js"></script>
+</body>
+</html>
