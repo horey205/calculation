@@ -80,7 +80,7 @@
                     const d = Math.floor(absV);
                     const m = Math.floor((absV - d) * 60);
                     const s = ((absV - d) * 60 - m) * 60;
-                    resultEl.innerText = modePrefix + (state.lastValue < 0 ? "-" : "") + d + "°" + m + "'" + s.toFixed(2) + "\"";
+                    resultEl.innerText = modePrefix + (state.lastValue < 0 ? "-" : "") + d + "°" + m + "'" + s.toFixed(4) + "\"";
                 } else {
                     resultEl.innerText = modePrefix + (state.expr === "" ? "0" : state.expr);
                 }
@@ -112,7 +112,6 @@
                         state.lastValue = result;
                         
                         // FIX: If it's a trig calculation (sin, cos, tan), ALWAYS show decimal result
-                        // Otherwise, follow the rule: if input has DMS, output DMS
                         const isTrig = state.expr.match(/sin|cos|tan|asin|acos|atan/);
                         if (isTrig) {
                             state.viewMode = "standard";
@@ -120,7 +119,8 @@
                             state.viewMode = state.expr.indexOf("°") !== -1 ? "DMS" : "standard";
                         }
                         
-                        state.expr = Number.isInteger(result) ? result.toString() : result.toFixed(10).replace(/\.?0+$/, "");
+                        // 10-base output formatting: FIX to 4 decimal places as requested
+                        state.expr = Number.isInteger(result) ? result.toString() : result.toFixed(4).replace(/\.?0+$/, "");
                     } catch (err) { resultEl.innerText = "Error"; }
                 } else if (finalAct === "DMS") {
                     const dmsChars = ["°", "'", '"'];
