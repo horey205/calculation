@@ -13,7 +13,7 @@
         #formula { font-size: 1.1rem; color: #1a2a1a; word-break: break-all; text-align: right; height: 1.5rem; overflow: hidden; opacity: 0.8; }
         #result { font-size: 2.2rem; font-weight: bold; color: #1a2a1a; text-align: right; }
         .grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; }
-        button { height: 50px; border: none; border-radius: 6px; background: var(--btn); color: white; cursor: pointer; font-size: 0.9rem; font-weight: bold; box-shadow: 0 4px 0 #1b263b; -webkit-tap-highlight-color: transparent; }
+        button { height: 50px; border: none; border-radius: 6px; background: var(--btn); color: white; cursor: pointer; font-size: 0.9rem; font-weight: bold; box-shadow: 0 4px 0 #1b263b; -webkit-tap-highlight-color: transparent; position: relative; }
         button:active { transform: translateY(2px); box-shadow: 0 1px 0 #1b263b; background: #4a6fa5; }
         .btn-n { background: var(--white); color: #333; font-size: 1.4rem; box-shadow: 0 4px 0 #bdc3c7; }
         .btn-op { background: var(--orange); box-shadow: 0 4px 0 #d35400; }
@@ -46,97 +46,110 @@
         </div>
     </div>
     <script>
-        // SINGLE-FILE STANDALONE ENGINE (MAX COMPATIBILITY)
-        const formulaEl = document.getElementById('formula');
-        const resultEl = document.getElementById('result');
-        let state = { expr: "", lastValue: 0, ansValue: 0, isShift: false, viewMode: "standard" };
+        (function() {
+            const formulaEl = document.getElementById('formula');
+            const resultEl = document.getElementById('result');
+            let state = { expr: "", lastValue: 0, ansValue: 0, isShift: false, viewMode: "standard" };
 
-        const degToRad = (d) => d * (Math.PI / 180);
-        const radToDeg = (r) => r * (180 / Math.PI);
+            const degToRad = (d) => d * (Math.PI / 180);
+            const radToDeg = (r) => r * (180 / Math.PI);
 
-        const solveFinal = (str) => {
-            let f = str.replace(/Ans/g, "(" + state.ansValue + ")");
-            f = f.replace(/(\d+)°(\d+)'(\d+(?:\.\d+)?)"/g, '($1 + $2/60 + $3/3600)');
-            f = f.replace(/(\d+)°(\d+)'/g, '($1 + $2/60)');
-            f = f.replace(/(\d+)°/g, '($1)');
-            f = f.replace(/×/g, '*').replace(/÷/g, '/');
-            f = f.replace(/asin\(([^)]+)\)/g, 'radToDeg(Math.asin($1))');
-            f = f.replace(/acos\(([^)]+)\)/g, 'radToDeg(Math.acos($1))');
-            f = f.replace(/atan\(([^)]+)\)/g, 'radToDeg(Math.atan($1))');
-            f = f.replace(/(?<!a)sin\(([^)]+)\)/g, 'Math.sin(degToRad($1))');
-            f = f.replace(/(?<!a)cos\(([^)]+)\)/g, 'Math.cos(degToRad($1))');
-            f = f.replace(/(?<!a)tan\(([^)]+)\)/g, 'Math.tan(degToRad($1))');
-            f = f.replace(/sqrt\(([^)]+)\)/g, 'Math.sqrt($1)');
-            let open = (f.match(/\(/g) || []).length;
-            let close = (f.match(/\)/g) || []).length;
-            while (open > close) { f += ")"; open--; }
-            return eval(f);
-        };
+            const solveInternal = (str) => {
+                let f = str.replace(/Ans/g, "(" + state.ansValue + ")");
+                f = f.replace(/(\d+)°(\d+)'(\d+(?:\.\d+)?)"/g, '($1 + $2/60 + $3/3600)');
+                f = f.replace(/(\d+)°(\d+)'/g, '($1 + $2/60)');
+                f = f.replace(/(\d+)°/g, '($1)');
+                f = f.replace(/×/g, '*').replace(/÷/g, '/');
+                f = f.replace(/asin\(([^)]+)\)/g, 'radToDeg(Math.asin($1))');
+                f = f.replace(/acos\(([^)]+)\)/g, 'radToDeg(Math.acos($1))');
+                f = f.replace(/atan\(([^)]+)\)/g, 'radToDeg(Math.atan($1))');
+                f = f.replace(/(?<!a)sin\(([^)]+)\)/g, 'Math.sin(degToRad($1))');
+                f = f.replace(/(?<!a)cos\(([^)]+)\)/g, 'Math.cos(degToRad($1))');
+                f = f.replace(/(?<!a)tan\(([^)]+)\)/g, 'Math.tan(degToRad($1))');
+                f = f.replace(/sqrt\(([^)]+)\)/g, 'Math.sqrt($1)');
+                let open = (f.match(/\(/g) || []).length;
+                let close = (f.match(/\)/g) || []).length;
+                while (open > close) { f += ")"; open--; }
+                return eval(f);
+            };
 
-        const updateUI = () => {
-            let mode = state.isShift ? "S " : "";
-            if (state.viewMode === "DMS" && state.lastValue !== 0) {
-                const abs = Math.abs(state.lastValue);
-                const d = Math.floor(abs);
-                const m = Math.floor((abs - d) * 60);
-                const s = ((abs - d) * 60 - m) * 60;
-                resultEl.innerText = mode + (state.lastValue < 0 ? "-" : "") + d + "°" + m + "'" + s.toFixed(2) + "\"";
-            } else {
-                resultEl.innerText = mode + (state.expr === "" ? "0" : state.expr);
-            }
-        };
-
-        const handleInput = (val, btn) => {
-            if (val === "SHIFT") { state.isShift = !state.isShift; updateUI(); return; }
-            if (val === "AC") { state.expr = ""; formulaEl.innerText = ""; state.viewMode = "standard"; updateUI(); return; }
-            if (val === "DEL") { state.expr = state.expr.slice(0, -1); updateUI(); return; }
-
-            let action = val;
-            if (state.isShift) {
-                if (action === "sin") action = "asin";
-                else if (action === "cos") action = "acos";
-                else if (action === "tan") action = "atan";
-                state.isShift = false;
-            }
-
-            if (action === "=") {
-                if (!state.expr) return;
-                try {
-                    const res = solveFinal(state.expr);
-                    formulaEl.innerText = state.expr + "=";
-                    state.ansValue = res;
-                    state.lastValue = res;
-                    state.viewMode = state.expr.indexOf("°") !== -1 ? "DMS" : "standard";
-                    state.expr = Number.isInteger(res) ? res.toString() : res.toFixed(10).replace(/\.?0+$/, "");
-                } catch (e) { resultEl.innerText = "Error"; }
-            } else if (action === "DMS") {
-                const dmsSyms = ["°", "'", '"'];
-                const lastToken = state.expr.split(/[+\-*/() ]/).pop();
-                if (/\d/.test(state.expr.slice(-1))) {
-                    const symCnt = (lastToken.match(/[°'"]/g) || []).length;
-                    if (symCnt < 3) state.expr += dmsSyms[symCnt];
-                } else if (state.lastValue !== 0) {
-                    state.viewMode = state.viewMode === "DMS" ? "standard" : "DMS";
+            const updateUI = () => {
+                let modePrefix = state.isShift ? "S " : "";
+                if (state.viewMode === "DMS" && state.lastValue !== 0) {
+                    const absV = Math.abs(state.lastValue);
+                    const d = Math.floor(absV);
+                    const m = Math.floor((absV - d) * 60);
+                    const s = ((absV - d) * 60 - m) * 60;
+                    resultEl.innerText = modePrefix + (state.lastValue < 0 ? "-" : "") + d + "°" + m + "'" + s.toFixed(2) + "\"";
+                } else {
+                    resultEl.innerText = modePrefix + (state.expr === "" ? "0" : state.expr);
                 }
-            } else if (["sin", "cos", "tan", "asin", "acos", "atan", "sqrt"].indexOf(action) !== -1) {
-                state.expr += action + "(";
-            } else {
-                state.expr += action;
-            }
-            updateUI();
-        };
+            };
 
-        // BINDING
-        const btns = document.querySelectorAll('button');
-        btns.forEach(b => {
-             const v = b.getAttribute('data-v');
-             const trigger = (e) => {
-                 e.preventDefault(); e.stopPropagation();
-                 handleInput(v, b);
-                 return false;
-             };
-             b.onclick = trigger; b.ontouchstart = trigger;
-        });
+            const triggerAction = (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                
+                const btn = e.currentTarget;
+                const val = btn.getAttribute('data-v');
+
+                if (val === "SHIFT") { state.isShift = !state.isShift; updateUI(); return; }
+                if (val === "AC") { state.expr = ""; formulaEl.innerText = ""; state.viewMode = "standard"; updateUI(); return; }
+                if (val === "DEL") { state.expr = state.expr.slice(0, -1); updateUI(); return; }
+
+                let finalAct = val;
+                if (state.isShift) {
+                    if (finalAct === "sin") finalAct = "asin";
+                    else if (finalAct === "cos") finalAct = "acos";
+                    else if (finalAct === "tan") finalAct = "atan";
+                    state.isShift = false;
+                }
+
+                if (finalAct === "=") {
+                    if (!state.expr) return;
+                    try {
+                        const result = solveInternal(state.expr);
+                        formulaEl.innerText = state.expr + "=";
+                        state.ansValue = result;
+                        state.lastValue = result;
+                        state.viewMode = state.expr.indexOf("°") !== -1 ? "DMS" : "standard";
+                        state.expr = Number.isInteger(result) ? result.toString() : result.toFixed(10).replace(/\.?0+$/, "");
+                    } catch (err) { resultEl.innerText = "Error"; }
+                } else if (finalAct === "DMS") {
+                    const dmsChars = ["°", "'", '"'];
+                    const lastToken = state.expr.split(/[+\-*/() ]/).pop();
+                    const lastC = state.expr.slice(-1);
+                    if (/\d/.test(lastC)) {
+                        const symCount = (lastToken.match(/[°'"]/g) || []).length;
+                        if (symCount < 3) state.expr += dmsChars[symCount];
+                    } else if (state.lastValue !== 0) {
+                        state.viewMode = state.viewMode === "DMS" ? "standard" : "DMS";
+                    }
+                } else if (["sin", "cos", "tan", "asin", "acos", "atan", "sqrt"].indexOf(finalAct) !== -1) {
+                    state.expr += finalAct + "(";
+                } else {
+                    state.expr += finalAct;
+                }
+                updateUI();
+            };
+
+            const boot = () => {
+                const allButtons = document.querySelectorAll('button');
+                allButtons.forEach(b => {
+                    b.onclick = triggerAction;
+                    b.ontouchstart = triggerAction;
+                    b.onmousedown = triggerAction;
+                });
+            };
+
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', boot);
+            } else {
+                boot();
+            }
+            // Continuous Health Check for GH-Pages environment
+            setInterval(boot, 2000);
+        })();
     </script>
 </body>
 </html>
