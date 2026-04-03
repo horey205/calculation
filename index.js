@@ -28,24 +28,28 @@ const solve = (str) => {
     let open = (clean.match(/\(/g) || []).length;
     let close = (clean.match(/\)/g) || []).length;
     while (open > close) { clean += ")"; open--; }
-    
     return clean;
 };
 
-// HANDLER FOR BOTH CLICK AND TOUCH
-const handleAction = (e) => {
-    const btn = e.target.closest('button');
-    if (!btn) return;
+// EXPLICIT ACTION FUNCTION
+const doClick = (btnVal, btnWrapper) => {
+    const val = btnVal;
     
-    e.preventDefault();
-    const val = btn.dataset.v;
-
-    // SHIFT Logic
     if (val === "SHIFT") { state.isShift = !state.isShift; update(); return; }
     if (val === "AC") { state.expr = ""; formulaEl.innerText = ""; state.viewMode = "standard"; update(); return; }
     if (val === "DEL") { state.expr = state.expr.slice(0, -1); update(); return; }
 
-    if (val === "=") {
+    let action = val;
+    if (state.isShift) {
+        // Re-read gold label since we might be in shift state
+        const gold = btnWrapper?.querySelector('.label-gold')?.innerText.trim() || "";
+        if (gold.includes('asin')) action = 'asin';
+        else if (gold.includes('acos')) action = 'acos';
+        else if (gold.includes('atan')) action = 'atan';
+        state.isShift = false;
+    }
+
+    if (action === "=") {
         if (!state.expr) return;
         try {
             const rawRes = evaluate(solve(state.expr));
@@ -58,7 +62,7 @@ const handleAction = (e) => {
         } catch (err) {
             resultEl.innerText = "Math ERROR";
         }
-    } else if (val === "DMS") {
+    } else if (action === "DMS") {
         const lastToken = state.expr.split(/[+\-*/() ]/).pop();
         const lastChar = state.expr.slice(-1);
         if (/\d/.test(lastChar)) {
@@ -68,17 +72,32 @@ const handleAction = (e) => {
         } else if (state.lastValue !== 0) {
             state.viewMode = (state.viewMode === "DMS") ? "standard" : "DMS";
         }
-    } else if (['sin', 'cos', 'tan', 'asin', 'acos', 'atan', 'sqrt'].includes(val)) {
-        state.expr += val + "(";
+    } else if (['sin', 'cos', 'tan', 'asin', 'acos', 'atan', 'sqrt'].includes(action)) {
+        state.expr += action + "(";
     } else {
-        state.expr += val;
+        state.expr += action;
     }
     update();
 };
 
-// MULTI-TOUCH SUPPORT: Using pointerdown or click+touchstart for mobile
-document.addEventListener('touchstart', handleAction, { passive: false });
-document.addEventListener('click', handleAction);
+// FINAL OVERHAUL FOR TOUCH RELIABILITY
+// Using the most basic and compatible event attachment strategy
+window.onload = () => {
+    const buttons = document.getElementsByTagName('button');
+    for (let i = 0; i < buttons.length; i++) {
+        const b = buttons[i];
+        
+        // Use pointerdown or touchstart directly on the element
+        const trigger = (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            doClick(b.getAttribute('data-v'), b.closest('.btn-wrapper'));
+        };
+
+        b.addEventListener('pointerdown', trigger, { passive: false });
+        b.addEventListener('click', trigger);
+    }
+};
 
 function toDMS(d) {
     const abs = Math.abs(d);
