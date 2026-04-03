@@ -17,7 +17,7 @@
         button:active { transform: translateY(2px); box-shadow: 0 1px 0 #1b263b; background: #4a6fa5; }
         .btn-n { background: var(--white); color: #333; font-size: 1.4rem; box-shadow: 0 4px 0 #bdc3c7; }
         .btn-op { background: var(--orange); box-shadow: 0 4px 0 #d35400; }
-        .btn-shift { background: #e67e22; box-shadow: 0 4px 0 #d35400; }
+        .btn-pow { background: #2c3e50; font-size: 1rem; }
     </style>
 </head>
 <body>
@@ -27,7 +27,8 @@
             <div id="result">0</div>
         </div>
         <div class="grid">
-            <button data-v="SHIFT" class="btn-shift">SHIFT</button>
+            <!-- REPLACED SHIFT WITH x^y -->
+            <button data-v="pow" class="btn-pow">x<sup>y</sup></button>
             <button data-v="sin">sin</button>
             <button data-v="cos">cos</button>
             <button data-v="tan">tan</button>
@@ -49,7 +50,7 @@
         (function() {
             const formulaEl = document.getElementById('formula');
             const resultEl = document.getElementById('result');
-            let state = { expr: "", lastValue: 0, ansValue: 0, isShift: false, viewMode: "standard" };
+            let state = { expr: "", lastValue: 0, ansValue: 0, viewMode: "standard" };
 
             const degToRad = (d) => d * (Math.PI / 180);
             const radToDeg = (r) => r * (180 / Math.PI);
@@ -59,6 +60,8 @@
                 f = f.replace(/(\d+)°(\d+)'(\d+(?:\.\d+)?)"/g, '($1 + $2/60 + $3/3600)');
                 f = f.replace(/(\d+)°(\d+)'/g, '($1 + $2/60)');
                 f = f.replace(/(\d+)°/g, '($1)');
+                // POWER symbol replacement (^)
+                f = f.replace(/\^/g, '**');
                 f = f.replace(/×/g, '*').replace(/÷/g, '/');
                 f = f.replace(/asin\(([^)]+)\)/g, 'radToDeg(Math.asin($1))');
                 f = f.replace(/acos\(([^)]+)\)/g, 'radToDeg(Math.acos($1))');
@@ -74,7 +77,7 @@
             };
 
             const updateUI = () => {
-                let modePrefix = state.isShift ? "S " : "";
+                const modePrefix = "";
                 if (state.viewMode === "DMS" && state.lastValue !== 0) {
                     const absV = Math.abs(state.lastValue);
                     const d = Math.floor(absV);
@@ -91,19 +94,10 @@
                 const btn = e.currentTarget;
                 const val = btn.getAttribute('data-v');
 
-                if (val === "SHIFT") { state.isShift = !state.isShift; updateUI(); return; }
                 if (val === "AC") { state.expr = ""; formulaEl.innerText = ""; state.viewMode = "standard"; updateUI(); return; }
                 if (val === "DEL") { state.expr = state.expr.slice(0, -1); updateUI(); return; }
 
-                let finalAct = val;
-                if (state.isShift) {
-                    if (finalAct === "sin") finalAct = "asin";
-                    else if (finalAct === "cos") finalAct = "acos";
-                    else if (finalAct === "tan") finalAct = "atan";
-                    state.isShift = false;
-                }
-
-                if (finalAct === "=") {
+                if (val === "=") {
                     if (!state.expr) return;
                     try {
                         const result = solveInternal(state.expr);
@@ -111,18 +105,16 @@
                         state.ansValue = result;
                         state.lastValue = result;
                         
-                        // FIX: If it's a trig calculation (sin, cos, tan), ALWAYS show decimal result
-                        const isTrig = state.expr.match(/sin|cos|tan|asin|acos|atan/);
-                        if (isTrig) {
+                        const isDecimalResult = state.expr.match(/sin|cos|tan|asin|acos|atan/) || state.expr.indexOf("^") !== -1;
+                        if (isDecimalResult) {
                             state.viewMode = "standard";
                         } else {
                             state.viewMode = state.expr.indexOf("°") !== -1 ? "DMS" : "standard";
                         }
                         
-                        // 10-base output formatting: FIX to 4 decimal places as requested
                         state.expr = Number.isInteger(result) ? result.toString() : result.toFixed(4).replace(/\.?0+$/, "");
                     } catch (err) { resultEl.innerText = "Error"; }
-                } else if (finalAct === "DMS") {
+                } else if (val === "DMS") {
                     const dmsChars = ["°", "'", '"'];
                     const lastToken = state.expr.split(/[+\-*/() ]/).pop();
                     const lastC = state.expr.slice(-1);
@@ -132,10 +124,12 @@
                     } else if (state.lastValue !== 0) {
                         state.viewMode = state.viewMode === "DMS" ? "standard" : "DMS";
                     }
-                } else if (["sin", "cos", "tan", "asin", "acos", "atan", "sqrt"].indexOf(finalAct) !== -1) {
-                    state.expr += finalAct + "(";
+                } else if (val === "pow") {
+                    state.expr += "^";
+                } else if (["sin", "cos", "tan", "asin", "acos", "atan", "sqrt"].indexOf(val) !== -1) {
+                    state.expr += val + "(";
                 } else {
-                    state.expr += finalAct;
+                    state.expr += val;
                 }
                 updateUI();
             };
