@@ -3,66 +3,256 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Casio fx-570VN PLUS | Standard Baseline</title>
+    <title>공학용계산기 Premium</title>
+    <!-- Google Fonts for Premium Look -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Orbitron:wght@500&display=swap" rel="stylesheet">
     <style>
-        :root { --bg: #222; --screen: #94ad94; --btn: #3d5a80; --white: #ecf0f1; --orange: #f39c12; }
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; touch-action: manipulation; }
-        body { background: #111; display: flex; justify-content: center; align-items: center; height: 100vh; overflow: hidden; margin: 0; }
-        .calc { width: 100%; max-width: 400px; background: #34495e; padding: 15px; border-radius: 15px; box-shadow: 0 10px 40px rgba(0,0,0,0.8); }
-        .screen { background: var(--screen); height: 120px; border-radius: 6px; padding: 12px; display: flex; flex-direction: column; justify-content: space-between; align-items: flex-end; box-shadow: inset 0 2px 10px rgba(0,0,0,0.4); margin-bottom: 20px; border: 2px solid #555; }
-        #formula { font-size: 1.1rem; color: #1a2a1a; word-break: break-all; text-align: right; height: 1.5rem; overflow: hidden; opacity: 0.8; }
-        #result { font-size: 2.2rem; font-weight: bold; color: #1a2a1a; text-align: right; }
-        .grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; }
-        button { height: 50px; border: none; border-radius: 6px; background: var(--btn); color: white; cursor: pointer; font-size: 0.9rem; font-weight: bold; box-shadow: 0 4px 0 #1b263b; -webkit-tap-highlight-color: transparent; position: relative; }
-        button:active { transform: translateY(2px); box-shadow: 0 1px 0 #1b263b; background: #4a6fa5; }
-        .btn-n { background: var(--white); color: #333; font-size: 1.4rem; box-shadow: 0 4px 0 #bdc3c7; }
-        .btn-op { background: var(--orange); box-shadow: 0 4px 0 #d35400; }
-        .btn-pow { background: #2c3e50; font-size: 1rem; }
+        :root {
+            --bg: #1a1a1d;
+            --calc-body: #2d3436;
+            --screen-bg: #9ea78d;
+            --screen-text: #1a1a1a;
+            --btn-num: #f1f2f6;
+            --btn-func: #34495e;
+            --btn-op: #e67e22;
+            --btn-clear: #c0392b;
+            --accent: #0984e3;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', -apple-system, sans-serif;
+            touch-action: manipulation;
+            user-select: none;
+        }
+
+        body {
+            background: var(--bg);
+            background: radial-gradient(circle at center, #2d3436 0%, #1a1a1d 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .calc-container {
+            width: 100%;
+            max-width: 380px;
+            background: var(--calc-body);
+            padding: 24px;
+            border-radius: 32px;
+            box-shadow: 0 30px 60px rgba(0,0,0,0.6), inset 0 2px 2px rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .brand {
+            color: #bdc3c7;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-bottom: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            letter-spacing: 1px;
+        }
+
+        .screen {
+            background: var(--screen-bg);
+            height: 110px;
+            border-radius: 12px;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            box-shadow: inset 0 4px 10px rgba(0,0,0,0.3);
+            margin-bottom: 24px;
+            border: 3px solid #1e272e;
+        }
+
+        #formula {
+            font-family: 'Segoe UI', -apple-system, sans-serif;
+            font-size: 0.9rem;
+            color: rgba(26, 26, 26, 0.7);
+            text-align: right;
+            height: 1.5rem;
+            overflow: hidden;
+            white-space: nowrap;
+        }
+
+        #result {
+            font-family: 'Segoe UI', -apple-system, sans-serif;
+            font-size: 1.8rem;
+            font-weight: 600;
+            color: var(--screen-text);
+            text-align: right;
+            line-height: 1.2;
+            word-break: break-all;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 12px;
+        }
+
+        button {
+            height: 52px;
+            border: none;
+            border-radius: 12px;
+            background: var(--btn-func);
+            color: white;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.1s ease;
+            box-shadow: 0 4px 0 #1e272e;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        button:active {
+            transform: translateY(3px);
+            box-shadow: 0 1px 0 #1e272e;
+        }
+
+        .btn-num {
+            background: var(--btn-num);
+            color: #2d3436;
+            font-size: 1.3rem;
+            box-shadow: 0 4px 0 #bdc3c7;
+        }
+
+        .btn-op {
+            background: var(--btn-op);
+            box-shadow: 0 4px 0 #d35400;
+        }
+
+        .btn-clear {
+            background: var(--btn-clear);
+            box-shadow: 0 4px 0 #922b21;
+        }
+
+        .btn-func-small {
+            font-size: 0.8rem;
+            background: #4b5563;
+        }
+
+        sup { font-size: 0.6rem; }
+
+        @media (max-width: 400px) {
+            .calc-container { padding: 16px; border-radius: 0; height: 100vh; max-width: none; }
+            button { height: 60px; }
+        }
     </style>
 </head>
 <body>
-    <div class="calc">
+    <div class="calc-container">
+        <div class="brand">
+            <span>CASIO</span>
+            <span>공학용계산기</span>
+        </div>
         <div class="screen">
             <div id="formula"></div>
             <div id="result">0</div>
         </div>
         <div class="grid">
-            <!-- REPLACED SHIFT WITH x^y -->
-            <button data-v="pow" class="btn-pow">x<sup>y</sup></button>
-            <button data-v="sin">sin</button>
-            <button data-v="cos">cos</button>
-            <button data-v="tan">tan</button>
-            <button data-v="AC" class="btn-op">AC</button>
+            <!-- Row 1 -->
+            <button data-v="pow" class="btn-func-small">
+                <div style="display: flex; align-items: flex-start; line-height: 1;">
+                    <span style="font-size: 1.3rem; margin-right: 1px;">x</span>
+                    <span style="font-size: 0.7rem; color: #ff9f43; font-weight: bold; margin-top: -2px;">y</span>
+                </div>
+            </button>
+            <button data-v="sin" class="btn-func-small">sin</button>
+            <button data-v="cos" class="btn-func-small">cos</button>
+            <button data-v="tan" class="btn-func-small">tan</button>
+            <button data-v="AC" class="btn-clear">AC</button>
             
-            <button data-v="asin">sin-1</button>
-            <button data-v="acos">cos-1</button>
-            <button data-v="atan">tan-1</button>
-            <button data-v="sqrt">√</button>
-            <button data-v="DEL" class="btn-op">DEL</button>
+            <!-- Row 2 -->
+            <button data-v="DMS" class="btn-func-small">° ' "</button>
+            <button data-v="asin" class="btn-func-small">sin⁻¹</button>
+            <button data-v="acos" class="btn-func-small">cos⁻¹</button>
+            <button data-v="atan" class="btn-func-small">tan⁻¹</button>
+            <button data-v="DEL" class="btn-clear">DEL</button>
             
-            <button data-v="7" class="btn-n">7</button><button data-v="8" class="btn-n">8</button><button data-v="9" class="btn-n">9</button><button data-v="(">(</button><button data-v=")">)</button>
-            <button data-v="4" class="btn-n">4</button><button data-v="5" class="btn-n">5</button><button data-v="6" class="btn-n">6</button><button data-v="*">×</button><button data-v="/">÷</button>
-            <button data-v="1" class="btn-n">1</button><button data-v="2" class="btn-n">2</button><button data-v="3" class="btn-n">3</button><button data-v="+">+</button><button data-v="-">-</button>
-            <button data-v="0" class="btn-n">0</button><button data-v=".">.</button><button data-v="DMS">.,,,</button><button data-v="Ans">Ans</button><button data-v="=" class="btn-op">=</button>
+            <!-- Row 3 -->
+            <button data-v="7" class="btn-num">7</button>
+            <button data-v="8" class="btn-num">8</button>
+            <button data-v="9" class="btn-num">9</button>
+            <button data-v="(">(</button>
+            <button data-v=")">)</button>
+            
+            <!-- Row 4 -->
+            <button data-v="4" class="btn-num">4</button>
+            <button data-v="5" class="btn-num">5</button>
+            <button data-v="6" class="btn-num">6</button>
+            <button data-v="*">×</button>
+            <button data-v="/">÷</button>
+            
+            <!-- Row 5 -->
+            <button data-v="1" class="btn-num">1</button>
+            <button data-v="2" class="btn-num">2</button>
+            <button data-v="3" class="btn-num">3</button>
+            <button data-v="+">+</button>
+            <button data-v="-">-</button>
+            
+            <!-- Row 6 -->
+            <button data-v="0" class="btn-num">0</button>
+            <button data-v=".">.</button>
+            <button data-v="sqrt" class="btn-func-small">√</button>
+            <button data-v="Ans">Ans</button>
+            <button data-v="=" class="btn-op">=</button>
         </div>
     </div>
+
     <script>
-        (function() {
-            const formulaEl = document.getElementById('formula');
-            const resultEl = document.getElementById('result');
-            let state = { expr: "", lastValue: 0, ansValue: 0, viewMode: "standard" };
+        const formulaEl = document.getElementById('formula');
+        const resultEl = document.getElementById('result');
+        
+        let state = {
+            expr: "",
+            lastResult: 0,
+            ansValue: 0,
+            isNewCalc: false,
+            viewMode: "DEC" // DEC or DMS
+        };
 
-            const degToRad = (d) => d * (Math.PI / 180);
-            const radToDeg = (r) => r * (180 / Math.PI);
+        const degToRad = (d) => d * (Math.PI / 180);
+        const radToDeg = (r) => r * (180 / Math.PI);
 
-            const solveInternal = (str) => {
-                let f = str.replace(/Ans/g, "(" + state.ansValue + ")");
-                f = f.replace(/(\d+)°(\d+)'(\d+(?:\.\d+)?)"/g, '($1 + $2/60 + $3/3600)');
-                f = f.replace(/(\d+)°(\d+)'/g, '($1 + $2/60)');
-                f = f.replace(/(\d+)°/g, '($1)');
-                // POWER symbol replacement (^)
+        const toDMS = (val) => {
+            if (typeof val !== 'number' || isNaN(val)) return "Error";
+            const absV = Math.abs(val);
+            // 36000000 for 4 decimal places precision in seconds
+            const totalMicroSeconds = Math.round(absV * 36000000);
+            
+            const totalSeconds = totalMicroSeconds / 10000;
+            const d = Math.floor(absV);
+            const m = Math.floor((absV - d) * 60 + 0.0000001); // small offset for float
+            const s = (absV - d - m/60) * 3600;
+            
+            const sign = val < 0 ? "-" : "";
+            // Clean up to 4 decimal places for seconds
+            const cleanS = Math.abs(s) < 0.00001 ? 0 : s;
+            return `${sign}${d}°${m}'${cleanS.toFixed(4)}"`;
+        };
+
+        const solve = (expression) => {
+            try {
+                let f = expression.replace(/Ans/g, `(${state.ansValue})`);
+                
+                // DMS Parsing: Convert "23°23'" and "23°23'12\"" to decimal
+                f = f.replace(/(\d+(?:\.\d+)?)°(\d+(?:\.\d+)?)'(\d+(?:\.\d+)?)"/g, '($1 + $2/60 + $3/3600)');
+                f = f.replace(/(\d+(?:\.\d+)?)°(\d+(?:\.\d+)?)'/g, '($1 + $2/60)');
+                f = f.replace(/(\d+(?:\.\d+)?)°/g, '($1)');
+
                 f = f.replace(/\^/g, '**');
                 f = f.replace(/×/g, '*').replace(/÷/g, '/');
+                
                 f = f.replace(/asin\(([^)]+)\)/g, 'radToDeg(Math.asin($1))');
                 f = f.replace(/acos\(([^)]+)\)/g, 'radToDeg(Math.acos($1))');
                 f = f.replace(/atan\(([^)]+)\)/g, 'radToDeg(Math.atan($1))');
@@ -70,84 +260,99 @@
                 f = f.replace(/(?<!a)cos\(([^)]+)\)/g, 'Math.cos(degToRad($1))');
                 f = f.replace(/(?<!a)tan\(([^)]+)\)/g, 'Math.tan(degToRad($1))');
                 f = f.replace(/sqrt\(([^)]+)\)/g, 'Math.sqrt($1)');
-                let open = (f.match(/\(/g) || []).length;
-                let close = (f.match(/\)/g) || []).length;
-                while (open > close) { f += ")"; open--; }
-                return eval(f);
-            };
 
-            const updateUI = () => {
-                const modePrefix = "";
-                if (state.viewMode === "DMS" && state.lastValue !== 0) {
-                    const absV = Math.abs(state.lastValue);
-                    const d = Math.floor(absV);
-                    const m = Math.floor((absV - d) * 60);
-                    const s = ((absV - d) * 60 - m) * 60;
-                    resultEl.innerText = modePrefix + (state.lastValue < 0 ? "-" : "") + d + "°" + m + "'" + s.toFixed(4) + "\"";
+                const openCount = (f.match(/\(/g) || []).length;
+                const closeCount = (f.match(/\)/g) || []).length;
+                f += ')'.repeat(Math.max(0, openCount - closeCount));
+
+                const final = eval(f);
+                if (isNaN(final) || !isFinite(final)) throw new Error("Invalid");
+                return final;
+            } catch (e) {
+                return "Error";
+            }
+        };
+
+        const formatNumber = (num) => {
+            if (num === "Error") return "Error";
+            if (state.viewMode === "DMS") return toDMS(num);
+            if (Number.isInteger(num)) return num.toString();
+            
+            // Avoid scientific notation for small manageable numbers
+            if (Math.abs(num) < 1e12 && Math.abs(num) > 1e-10) {
+                return parseFloat(num.toFixed(4)).toString();
+            }
+            return num.toExponential(4);
+        };
+
+        const updateUI = () => {
+            formulaEl.innerText = state.expr;
+            resultEl.innerText = state.expr === "" ? "0" : state.expr;
+        };
+
+        const handleInput = (val) => {
+            if (val === "AC") {
+                state.expr = "";
+                state.isNewCalc = false;
+                state.viewMode = "DEC";
+                formulaEl.innerText = "";
+                resultEl.innerText = "0";
+            } else if (val === "DEL") {
+                state.expr = state.expr.slice(0, -1);
+            } else if (val === "=") {
+                if (!state.expr) return;
+                const hasDMSInput = /[°'"]/.test(state.expr);
+                const res = solve(state.expr);
+                
+                state.lastResult = res;
+                state.ansValue = (res === "Error") ? state.ansValue : res;
+                
+                // If input had DMS, show result in DMS by default
+                state.viewMode = hasDMSInput ? "DMS" : "DEC";
+                
+                formulaEl.innerText = state.expr + "=";
+                resultEl.innerText = formatNumber(res);
+                
+                state.expr = (res === "Error") ? "" : formatNumber(res);
+                state.isNewCalc = true;
+                return;
+            } else if (val === "DMS") {
+                if (state.isNewCalc && typeof state.lastResult === 'number') {
+                    // Toggle View Mode for the result
+                    state.viewMode = (state.viewMode === "DEC" ? "DMS" : "DEC");
+                    resultEl.innerText = formatNumber(state.lastResult);
+                    state.expr = formatNumber(state.lastResult);
                 } else {
-                    resultEl.innerText = modePrefix + (state.expr === "" ? "0" : state.expr);
-                }
-            };
-
-            const triggerAction = (e) => {
-                e.preventDefault(); e.stopPropagation();
-                const btn = e.currentTarget;
-                const val = btn.getAttribute('data-v');
-
-                if (val === "AC") { state.expr = ""; formulaEl.innerText = ""; state.viewMode = "standard"; updateUI(); return; }
-                if (val === "DEL") { state.expr = state.expr.slice(0, -1); updateUI(); return; }
-
-                if (val === "=") {
-                    if (!state.expr) return;
-                    try {
-                        const result = solveInternal(state.expr);
-                        formulaEl.innerText = state.expr + "=";
-                        state.ansValue = result;
-                        state.lastValue = result;
-                        
-                        const isDecimalResult = state.expr.match(/sin|cos|tan|asin|acos|atan/) || state.expr.indexOf("^") !== -1;
-                        if (isDecimalResult) {
-                            state.viewMode = "standard";
-                        } else {
-                            state.viewMode = state.expr.indexOf("°") !== -1 ? "DMS" : "standard";
-                        }
-                        
-                        state.expr = Number.isInteger(result) ? result.toString() : result.toFixed(4).replace(/\.?0+$/, "");
-                    } catch (err) { resultEl.innerText = "Error"; }
-                } else if (val === "DMS") {
+                    const lastToken = state.expr.split(/[+\-*/()]/).pop();
                     const dmsChars = ["°", "'", '"'];
-                    const lastToken = state.expr.split(/[+\-*/() ]/).pop();
-                    const lastC = state.expr.slice(-1);
-                    if (/\d/.test(lastC)) {
-                        const symCount = (lastToken.match(/[°'"]/g) || []).length;
-                        if (symCount < 3) state.expr += dmsChars[symCount];
-                    } else if (state.lastValue !== 0) {
-                        state.viewMode = state.viewMode === "DMS" ? "standard" : "DMS";
+                    const used = (lastToken.match(/[°'"]/g) || []).length;
+                    if (/\d$/.test(state.expr) && used < 3) {
+                        state.expr += dmsChars[used];
                     }
-                } else if (val === "pow") {
-                    state.expr += "^";
-                } else if (["sin", "cos", "tan", "asin", "acos", "atan", "sqrt"].indexOf(val) !== -1) {
-                    state.expr += val + "(";
+                }
+            } else if (val === "pow") {
+                state.expr += "^";
+            } else if (["sin", "cos", "tan", "asin", "acos", "atan", "sqrt"].includes(val)) {
+                if (state.isNewCalc && !/[+\-*/]/.test(state.expr)) state.expr = "";
+                state.expr += val + "(";
+            } else {
+                if (state.isNewCalc && !/[+\-*/]/.test(val)) {
+                    state.expr = (val === "." ? "0." : val);
                 } else {
                     state.expr += val;
                 }
-                updateUI();
-            };
+            }
+            state.isNewCalc = false;
+            updateUI();
+        };
 
-            const boot = () => {
-                const allButtons = document.querySelectorAll('button');
-                allButtons.forEach(b => {
-                    b.onclick = triggerAction;
-                    b.ontouchstart = triggerAction;
-                    b.onmousedown = triggerAction;
-                });
-            };
-
-            if (document.readyState === 'loading') {
-                document.addEventListener('DOMContentLoaded', boot);
-            } else { boot(); }
-            setInterval(boot, 2000);
-        })();
+        // Unified Event Handling
+        document.querySelectorAll('button').forEach(btn => {
+            btn.addEventListener('pointerdown', (e) => {
+                e.preventDefault();
+                handleInput(btn.getAttribute('data-v'));
+            });
+        });
     </script>
 </body>
 </html>
